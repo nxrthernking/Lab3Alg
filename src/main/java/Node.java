@@ -1,7 +1,7 @@
 import java.time.LocalTime;
 import java.util.Objects;
 
-public class Node {
+public class Node implements Comparable<Node> {
     private LocalTime time;
     private int anInt;
     private float aFloat;
@@ -59,5 +59,18 @@ public class Node {
     @Override
     public int hashCode() {
         return Objects.hash(time, anInt, aFloat);
+    }
+
+    @Override
+    public int compareTo(Node o) {
+        if (this.time.compareTo(o.time) == 0) {
+            if (this.anInt == o.anInt) {
+                return Float.compare(this.aFloat, o.aFloat);
+            } else {
+                return this.anInt - o.anInt;
+            }
+        } else {
+            return this.time.compareTo(o.time);
+        }
     }
 }

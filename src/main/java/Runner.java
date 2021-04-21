@@ -1,12 +1,14 @@
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Runner {
 
     public static final int HOUR = 24;
     public static final int MIN_SEC = 60;
-    public static final int ARRAY_SIZE = 10;
+    public static final int ARRAY_SIZE = 10000; // Сортировать будет долго, особенно по 3 полям.
 
     public static void main(String[] args) {
         Random random = new Random();
@@ -18,31 +20,38 @@ public class Runner {
         LocalTime time;
         for (int i = 0; i < ARRAY_SIZE; i++) {
             time = LocalTime.of(random.nextInt(HOUR), random.nextInt(MIN_SEC), random.nextInt(MIN_SEC));
-//            time = LocalTime.of(11,11,11);
-            node = new Node(time, random.nextInt(100), random.nextFloat());
+//            time = LocalTime.of(11, 11, 11);
+            node = new Node(time, random.nextInt(3), random.nextFloat() + 1);
             nodes1[i] = node;
             nodes2[i] = node;
             nodes3[i] = node;
             nodes4[i] = node;
         }
 
-
         System.out.println("Сортировка по 1 критерию");
         sortByOneCriteria(nodes1);
-        print(nodes1);
+//        print(nodes1);
 
         System.out.println("Сортировка по 2 критериям");
         sortByTwoCriteria(nodes2);
 //        print(nodes2);
 
+        Node searchNode = nodes3[5]; // Объект из массива, который будем искать.
         System.out.println("Сортировка по 3 критериям");
         sortByThreeCriteria(nodes3);
-//        print(nodes3);
+        print(nodes3);
 
 
         System.out.println("Сортировка с проверкой на каждом шаге");
         lastSort(nodes4);
 //        print(nodes4);
+
+
+        int pos = interpolationSearch(nodes3, searchNode);
+
+        System.out.println("Искомый объект: " + searchNode);
+        System.out.println("Найденый объект: " + nodes3[pos] + " находится на позиции " + pos);
+
 
     }
 
@@ -64,16 +73,16 @@ public class Runner {
         extracted(swapCount, numberOfComparisons, resultTIme);
     }
 
-    private static void extracted(int swapCount, int numberOfComparisons, long resultTIme) {
+    private static void extracted(long swapCount, long numberOfComparisons, long resultTIme) {
         System.out.println("Количество сравнений: " + numberOfComparisons);
         System.out.println("Количество перестановок: " + swapCount);
-        System.out.println("Время: " + resultTIme);
+        System.out.println("Время: " + resultTIme + " миллисекунд");
     }
 
     private static void sortByTwoCriteria(Node[] nodes) {
 
-        int swapCount = 0;
-        int numberOfComparisons = 0;
+        long swapCount = 0;
+        long numberOfComparisons = 0;
         long start = System.currentTimeMillis();
         for (int i = 0; i < nodes.length; i++) {
             for (int j = 0; j < nodes.length; j++) {
@@ -175,28 +184,56 @@ public class Runner {
         extracted(swapCount, numberOfComparisons, resultTIme);
     }
 
-    private static int interpolationSearchByTime(Node[] nodes, Node elementToSearch) {
+    private static int interpolationSearch(Node[] nodes, Node elementToSearch) {
+
         int startIndex = 0;
-        int lastIndex = nodes.length;
-        
-        while ((startIndex <= lastIndex) && elementToSearch.getAnInt() >= nodes[startIndex].getAnInt()
-                && elementToSearch.getAnInt() <= nodes[lastIndex].getAnInt()) {
-            int pos = startIndex + ((lastIndex - startIndex) /
-                    (nodes[lastIndex].getAnInt() - nodes[startIndex].getAnInt()
-                            * elementToSearch.getAnInt() - nodes[startIndex].getAnInt()));
-            if (nodes[pos].getAnInt() == elementToSearch.getAnInt()) {
-                return pos;
+        int lastIndex = nodes.length - 1;
+        int pos = 0;
+
+        while (nodes[startIndex].compareTo(elementToSearch) < 0 && nodes[lastIndex].compareTo(elementToSearch) > 0) {
+
+            if (nodes[pos].getTime().compareTo(elementToSearch.getTime()) == 0) {
+                if (nodes[pos].getAnInt() == elementToSearch.getAnInt()) {
+                    if (Float.compare(nodes[pos].getaFloat(), elementToSearch.getaFloat()) == 0) {
+                        return pos;
+                    } else {
+                        pos = startIndex + (int) ((lastIndex - startIndex)
+                                / (nodes[lastIndex].getaFloat() - nodes[startIndex].getaFloat())
+                                * (elementToSearch.getaFloat() - nodes[startIndex].getaFloat()));
+                    }
+                } else {
+                    pos = startIndex + (lastIndex - startIndex)
+                            / (nodes[lastIndex].getAnInt() - nodes[startIndex].getAnInt())
+                            * (elementToSearch.getAnInt() - nodes[startIndex].getAnInt());
+                }
+            } else {
+                pos = startIndex + (lastIndex - startIndex)
+                        / (nodes[lastIndex].getTime().hashCode() - nodes[startIndex].getTime().hashCode())
+                        * (elementToSearch.getTime().hashCode() - nodes[startIndex].getTime().hashCode());
             }
 
-            if (nodes[pos].getAnInt() < elementToSearch.getAnInt()) {
+            int compareResult = nodes[pos].compareTo(elementToSearch);
+            if (compareResult < 0) {
                 startIndex = pos + 1;
-            } else {
-                lastIndex = pos + 1;
+            }
+            if (compareResult > 0) {
+                lastIndex = pos - 1;
+            }
+            if (compareResult == 0) {
+                return pos;
             }
 
         }
 
-        return  -1;
+        if (nodes[startIndex].compareTo(elementToSearch) == 0) {
+            return startIndex;
+        }
+        if (nodes[lastIndex].compareTo(elementToSearch) == 0) {
+            return lastIndex;
+        }
+
+        return -1;
     }
+
 
 }
