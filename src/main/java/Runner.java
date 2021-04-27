@@ -1,14 +1,12 @@
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class Runner {
 
     public static final int HOUR = 24;
     public static final int MIN_SEC = 60;
-    public static final int ARRAY_SIZE = 10000; // Сортировать будет долго, особенно по 3 полям.
+    public static final int ARRAY_SIZE = 100; // Сортировать будет долго, особенно по 3 полям.
 
     public static void main(String[] args) {
         Random random = new Random();
@@ -20,7 +18,7 @@ public class Runner {
         LocalTime time;
         for (int i = 0; i < ARRAY_SIZE; i++) {
             time = LocalTime.of(random.nextInt(HOUR), random.nextInt(MIN_SEC), random.nextInt(MIN_SEC));
-//            time = LocalTime.of(11, 11, 11);
+            time = LocalTime.of(11, 11, 11);
             node = new Node(time, random.nextInt(3), random.nextFloat() + 1);
             nodes1[i] = node;
             nodes2[i] = node;
@@ -47,10 +45,10 @@ public class Runner {
 //        print(nodes4);
 
 
-        int pos = interpolationSearch(nodes3, searchNode);
+/*        int pos = interpolationSearch(nodes3, searchNode);
 
         System.out.println("Искомый объект: " + searchNode);
-        System.out.println("Найденый объект: " + nodes3[pos] + " находится на позиции " + pos);
+        System.out.println("Найденый объект: " + nodes3[pos] + " находится на позиции " + pos);*/
 
 
     }
